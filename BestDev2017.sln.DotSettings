@@ -1,0 +1,424 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Applicability/=Surround/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Categories/=Imported_002012_002F12_002F2017/@EntryIndexedValue">Imported 12/12/2017</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Description/@EntryValue">Flood Fill Algorithm</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Field/=char/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Field/=char/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=558F05AA0DE96347816FF785232CFB2A/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=558F05AA0DE96347816FF785232CFB2A/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=558F05AA0DE96347816FF785232CFB2A/Type/@EntryValue">InCSharpTypeAndNamespace</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/Type/@EntryValue">InCSharpTypeMember</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Shortcut/@EntryValue">floodfill</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Text/@EntryValue">static class MapHelper
+{
+    public static void FloodFill($char$[,] array, int x, int y, $char$ filler)
+    {
+        RecursiveFloodFill(array, x, y, array[x, y], filler);
+    }
+
+    private static void RecursiveFloodFill($char$[,] array, int x, int y, $char$ empty, $char$ filler)
+    {
+        if (x &lt; 0 || x &gt; array.GetUpperBound(0) || y &lt; 0 || y &gt; array.GetUpperBound(1))
+        {
+            return;
+        }
+        var color = array[x, y];
+        if (color == filler || color!= empty)
+        {
+            return;
+        }
+        array[x, y] = filler;
+        RecursiveFloodFill(array, x+1, y, empty, filler);
+        RecursiveFloodFill(array, x, y + 1, empty, filler);
+        RecursiveFloodFill(array, x, y - 1, empty, filler);
+        RecursiveFloodFill(array, x - 1, y, empty, filler);
+    }
+	public static int FindClosest($char$[,] map, int x, int y, out int goalX, out int goalY)
+    {
+        var distances = new int[map.GetLength(0), map.GetLength(1)];
+        for (int i = 0; i &lt; map.GetLength(0); i++)
+        {
+            for (int j = 0; j &lt; map.GetLength(1); j++)
+            {
+                distances[i, j] = int.MaxValue;
+            }
+        }
+        goalX = -1;
+        goalY = -1;
+        var mindDist = int.MaxValue;
+        var curDist = 0;
+        SearchAround(map, distances, curDist, x, y, ref mindDist, ref goalX, ref goalY);
+        if (mindDist == int.MaxValue)
+        {
+            mindDist = -1;
+        }
+        return mindDist;
+    }
+
+    private static void RecursiveFindClosest(char[,] map, int[,] distances, int curDist, int x, int y, ref int mindDist, ref int goalX, ref int goalY)
+    {
+        if (curDist &gt; mindDist)
+        {
+            // too far, no need to keep searching
+            return;
+        }
+        if (x &lt; 0 || x &gt; map.GetUpperBound(0) || y &lt; 0 || y &gt; map.GetUpperBound(1))
+        {
+            // off map
+            return;
+        }
+		// goal check?
+        if (map[x, y] == )
+        {
+            distances[x, y] = curDist;
+            if (curDist &lt; mindDist)
+            {
+                mindDist = curDist;
+                goalX = x;
+                goalY = y;
+            }
+        }
+        else if (map[x, y] == )
+		// empty check
+        {
+            // we can keep moving
+            if (distances[x, y] &gt; curDist)
+            {
+                // we found a shorter path
+                SearchAround(map, distances, curDist, x, y, ref mindDist, ref goalX, ref goalY);
+            }
+        }
+    }
+
+    private static void SearchAround(char[,] map, int[,] distances, int curDist, int x, int y, ref int mindDist,
+        ref int goalX, ref int goalY)
+    {
+        distances[x, y] = curDist;
+        curDist++;
+        RecursiveFindClosest(map, distances, curDist, x + 1, y, ref mindDist, ref goalX, ref goalY);
+        RecursiveFindClosest(map, distances, curDist, x, y + 1, ref mindDist, ref goalX, ref goalY);
+        RecursiveFindClosest(map, distances, curDist, x, y - 1, ref mindDist, ref goalX, ref goalY);
+        RecursiveFindClosest(map, distances, curDist, x - 1, y, ref mindDist, ref goalX, ref goalY);
+    }
+}</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Description/@EntryValue">read a string from console</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Field/=text/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Field/=text/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/Type/@EntryValue">InCSharpStatement</s:String>
+	
+	
+	
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Shortcut/@EntryValue">rstring</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Text/@EntryValue">var $text$=Console.ReadLine();</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Field/=count/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Field/=count/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/Type/@EntryValue">InCSharpStatement</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Shortcut/@EntryValue">rint</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Description/@EntryValue">read an int from console</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Text/@EntryValue">var $count$ = int.Parse(Console.ReadLine());</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	
+	
+	
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Description/@EntryValue">read n strings from console</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Field/=count/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Field/=count/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Field/=texts/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Field/=texts/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/Type/@EntryValue">InCSharpStatement</s:String>
+	
+	
+	
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Shortcut/@EntryValue">rnstrings</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A628B72BD40965429530FFD8FA39624E/Text/@EntryValue">var $count$ = int.Parse(Console.ReadLine());&#xD;
+var $texts$ = new List&lt;string&gt;($count$);&#xD;
+for (int index = 0; index &lt; $count$; index++)&#xD;
+{&#xD;
+    var readLine = Console.ReadLine();&#xD;
+    $texts$.Add(readLine);&#xD;
+}&#xD;
+</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Description/@EntryValue">skelton classes for graph</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Field/=int/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Field/=int/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Field/=string/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Field/=string/Order/@EntryValue">0</s:Int64>
+	
+	
+	
+	
+	
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Scope/=558F05AA0DE96347816FF785232CFB2A/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Scope/=558F05AA0DE96347816FF785232CFB2A/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Scope/=558F05AA0DE96347816FF785232CFB2A/Type/@EntryValue">InCSharpTypeAndNamespace</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/Type/@EntryValue">InCSharpTypeMember</s:String>
+	
+	
+	
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Shortcut/@EntryValue">graphNode</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=A635952A0AFAEB4189193466D980E96C/Text/@EntryValue">public class GraphNode&#xD;
+{&#xD;
+    private readonly List&lt;GraphNode&gt; linked = new List&lt;GraphNode&gt;();&#xD;
+&#xD;
+    public $string$ Id { get; }&#xD;
+    public IEnumerable&lt;GraphNode&gt; Links =&gt; this.linked;&#xD;
+&#xD;
+    public GraphNode($string$ word)&#xD;
+    {&#xD;
+        this.Id = word;&#xD;
+    }&#xD;
+&#xD;
+    public void AddLink(GraphNode link)&#xD;
+    {&#xD;
+        this.linked.Add(link);&#xD;
+    }&#xD;
+&#xD;
+    public bool AttemptLink(GraphNode other)&#xD;
+    {&#xD;
+        if (this.HeuriDist(other) == 1)&#xD;
+        {&#xD;
+            this.AddLink(other);&#xD;
+            other.AddLink(this);&#xD;
+            return true;&#xD;
+        }&#xD;
+        return false;&#xD;
+    }&#xD;
+&#xD;
+    public $int$ HeuriDist(GraphNode other)&#xD;
+    {&#xD;
+        var dist = 0;&#xD;
+		&#xD;
+        return dist;&#xD;
+    }&#xD;
+&#xD;
+    public $int$ DistTo(GraphNode neighbor)&#xD;
+    {&#xD;
+        return this.linked.Contains(neighbor) ? 1 : int.MaxValue;&#xD;
+    }&#xD;
+}&#xD;
+&#xD;
+public class NodeDico&#xD;
+{&#xD;
+    private readonly Dictionary&lt;$string$, GraphNode&gt; nodes = new Dictionary&lt;string, GraphNode&gt;();&#xD;
+&#xD;
+    public GraphNode Get($string$ word)&#xD;
+    {&#xD;
+        if (!this.nodes.ContainsKey(word))&#xD;
+        {&#xD;
+            this.nodes.Add(word, new GraphNode(word));&#xD;
+        }&#xD;
+        return this.nodes[word];&#xD;
+    }&#xD;
+&#xD;
+    public List&lt;GraphNode&gt; FindPathAStar(GraphNode start, GraphNode goal)&#xD;
+    {&#xD;
+        // The set of nodes already evaluated&#xD;
+        var closedSet = new List&lt;GraphNode&gt;(this.nodes.Count);&#xD;
+        // The set of currently discovered nodes that are not evaluated yet.&#xD;
+        // Initially, only the start node is known.&#xD;
+        var openSet = new List&lt;GraphNode&gt;(this.nodes.Count) {start};&#xD;
+&#xD;
+        // For each node, which node it can most efficiently be reached from.&#xD;
+        // If a node can be reached from many nodes, cameFrom will eventually contain the&#xD;
+        // most efficient previous step.&#xD;
+        var cameFrom = new Dictionary&lt;GraphNode, GraphNode&gt;(this.nodes.Count);&#xD;
+&#xD;
+        // For each node, the cost of getting from the start node to that node.&#xD;
+        var gScore = new Dictionary&lt;GraphNode, $int$&gt;(this.nodes.Count);&#xD;
+        this.nodes.Values.Map((node) =&gt; gScore[node] = $int$.MaxValue);&#xD;
+&#xD;
+        // The cost of going from start to start is zero.&#xD;
+        gScore[start] = 0;&#xD;
+&#xD;
+        // For each node, the total cost of getting from the start node to the goal&#xD;
+        // by passing by that node. That value is partly known, partly heuristic.&#xD;
+        var fScore = new Dictionary&lt;GraphNode, $int$&gt;(this.nodes.Count);&#xD;
+        this.nodes.Values.Map((node) =&gt; fScore[node] = $int$.MaxValue);&#xD;
+&#xD;
+        // For the first node, that value is completely heuristic.&#xD;
+        fScore[start] = start.HeuriDist(goal);&#xD;
+&#xD;
+        while (openSet.Count &gt; 0)&#xD;
+        {&#xD;
+            // node having the lowest fScore value (approx closest one)&#xD;
+            var current = openSet.SelectMin((item) =&gt; fScore[item]);&#xD;
+&#xD;
+            if (current == goal) // we have reached our goal&#xD;
+            {&#xD;
+                var path = new List&lt;GraphNode&gt;() {current};&#xD;
+                while (cameFrom.ContainsKey(current))&#xD;
+                {&#xD;
+                    current = cameFrom[current];&#xD;
+                    path.Insert(0, current);&#xD;
+                }&#xD;
+                return path;&#xD;
+            }&#xD;
+&#xD;
+            openSet.Remove(current);&#xD;
+            closedSet.Add(current);&#xD;
+&#xD;
+            foreach (var neighbor in current.Links)&#xD;
+            {&#xD;
+                if (closedSet.Contains(neighbor))&#xD;
+                {&#xD;
+&#xD;
+                    // already evaluated&#xD;
+                    continue;&#xD;
+                }&#xD;
+                if (!openSet.Contains(neighbor))&#xD;
+                {&#xD;
+                    // new node&#xD;
+                    openSet.Add(neighbor);&#xD;
+                }&#xD;
+                // The distance from start to a neighbor&#xD;
+                var tentativeGScore = gScore[current] + current.DistTo(neighbor);&#xD;
+                if (tentativeGScore &gt;= gScore[neighbor])&#xD;
+                {&#xD;
+                    continue; // This is not a better path.&#xD;
+                }&#xD;
+                // This path is the best until now. Record it!&#xD;
+                cameFrom[neighbor] = current;&#xD;
+                gScore[neighbor] = tentativeGScore;&#xD;
+                fScore[neighbor] = gScore[neighbor] + neighbor.HeuriDist(goal);&#xD;
+            }&#xD;
+        }&#xD;
+&#xD;
+        return null;&#xD;
+    }&#xD;
+&#xD;
+    public List&lt;GraphNode&gt; BruteSinglePass(GraphNode start, GraphNode goal, out $int$ minDistance)&#xD;
+    {&#xD;
+        var usedNodes = new HashSet&lt;GraphNode&gt;();&#xD;
+&#xD;
+        minDistance = $int$.MaxValue;&#xD;
+        var result = BruteRecurse(start, goal, usedNodes, ref minDistance);&#xD;
+        return result;&#xD;
+    }&#xD;
+&#xD;
+    private static List&lt;GraphNode&gt; BruteRecurse(GraphNode start, GraphNode goal, HashSet&lt;GraphNode&gt; usedNodes, ref $int$ minDistance)&#xD;
+    {&#xD;
+        List&lt;GraphNode&gt; result = null;&#xD;
+        if (start == goal)&#xD;
+        {&#xD;
+            return new List&lt;GraphNode&gt; { start };&#xD;
+        }&#xD;
+        var nodes = new HashSet&lt;GraphNode&gt;(usedNodes){ start };&#xD;
+        var curDistance = minDistance == $int$.MaxValue ? 0 : minDistance;&#xD;
+        foreach (var neighbor in start.Links)&#xD;
+        {&#xD;
+            if (nodes.Contains(neighbor))&#xD;
+            {&#xD;
+                continue;&#xD;
+            }&#xD;
+            var furtherDist = curDistance + start.DistTo(neighbor);&#xD;
+            var scan = BruteRecurse(neighbor, goal, nodes, ref furtherDist);&#xD;
+            if (scan != null &amp;&amp; furtherDist &lt; minDistance)&#xD;
+            {&#xD;
+                result = new List&lt;GraphNode&gt; { start };&#xD;
+                result.AddRange(scan);&#xD;
+                minDistance = furtherDist;&#xD;
+            }&#xD;
+        }&#xD;
+        return result;&#xD;
+    }&#xD;
+&#xD;
+    public void Map(Action&lt;GraphNode&gt; mapper)&#xD;
+    {&#xD;
+        this.nodes.Values.Map(mapper);&#xD;
+    }&#xD;
+}&#xD;
+</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Description/@EntryValue">map &amp; reduce helpers</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Scope/=558F05AA0DE96347816FF785232CFB2A/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Scope/=558F05AA0DE96347816FF785232CFB2A/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Scope/=558F05AA0DE96347816FF785232CFB2A/Type/@EntryValue">InCSharpTypeAndNamespace</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Scope/=74A278E9BF386142B53D57114609A033/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Scope/=74A278E9BF386142B53D57114609A033/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Scope/=74A278E9BF386142B53D57114609A033/Type/@EntryValue">InCSharpExceptStringLiterals</s:String>
+	
+	
+	
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Shortcut/@EntryValue">mapreduce</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=CCB68293586138499A0491E195C12910/Text/@EntryValue">public static class ReduceHelper&#xD;
+{&#xD;
+    public static void Map&lt;T&gt;(this IEnumerable&lt;T&gt; enums, Action&lt;T&gt; mapper)&#xD;
+    {&#xD;
+        foreach (var entry in enums)&#xD;
+        {&#xD;
+            mapper(entry);&#xD;
+        }&#xD;
+    }&#xD;
+&#xD;
+    public static TU Reduce&lt;T, TU&gt;(this IEnumerable&lt;T&gt; enums, TU init, Func&lt;T, TU, TU&gt; reducer)&#xD;
+    {&#xD;
+        foreach (var entry in enums)&#xD;
+        {&#xD;
+            init = reducer(entry, init);&#xD;
+        }&#xD;
+        return init;&#xD;
+    }&#xD;
+&#xD;
+    public static T SelectMin&lt;T&gt;(this IEnumerable&lt;T&gt; enums, Func&lt;T, double&gt; metric)&#xD;
+    {&#xD;
+        var minValue = double.MaxValue;&#xD;
+        var minItem = default(T);&#xD;
+        foreach (var item in enums)&#xD;
+        {&#xD;
+            var current = metric(item);&#xD;
+            if (!(current &lt; minValue)) continue;&#xD;
+            minItem = item;&#xD;
+            minValue = current;&#xD;
+        }&#xD;
+        return minItem;&#xD;
+    }&#xD;
+&#xD;
+    public static T SelectMax&lt;T&gt;(this IEnumerable&lt;T&gt; enums, Func&lt;T, double&gt; metric)&#xD;
+    {&#xD;
+        var maxValue = double.MinValue;&#xD;
+        var maxItem = default(T);&#xD;
+        foreach (var item in enums)&#xD;
+        {&#xD;
+            var current = metric(item);&#xD;
+            if (!(current &gt; maxValue)) continue;&#xD;
+            maxItem = item;&#xD;
+            maxValue = current;&#xD;
+        }&#xD;
+        return maxItem;&#xD;
+    }&#xD;
+}&#xD;
+</s:String>
+	
+	</wpf:ResourceDictionary>
