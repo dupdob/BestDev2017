@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml.XPath;
 
 /*******
  * Read input from Console
@@ -20,102 +23,170 @@ namespace CSharpContestProject
     {
         static void Main(string[] args)
         {
-            var fragmentsCount = int.Parse(Console.ReadLine());
-            var fragments = new List<string>(fragmentsCount);
-            var totalLength = 0;
-            for (int index = 0; index < fragmentsCount; index++)
+            var H = int.Parse(Console.ReadLine());
+            var L = int.Parse(Console.ReadLine());
+            var X = 0;
+            var Y = 0;
+            var lines = new char[L, H];
+            for (var index = 0; index < H; index++)
             {
                 var readLine = Console.ReadLine();
-                fragments.Add(readLine);
-                totalLength += readLine.Length;
-            }
-
-            totalLength /= 2;
-            var firstRef = string.Empty;
-            var secondRef = string.Empty;
-            var fragments1 = string.Empty;
-            var fragments2 = string.Empty;
-            Scan(firstRef, secondRef, fragments, totalLength, fragments1, fragments2);
-            Console.ReadLine();
-        }
-
-        private static bool Scan(string firstRef, string secondRef, List<string> fragments, int totalLength, string fragments1, string fragments2)
-        {
-            if (fragments.Count == 0)
-            {
-                if (firstRef.Length == totalLength && IsCompatible(firstRef, secondRef))
+                for (int j = 0; j < L; j++)
                 {
-                    Console.WriteLine("{0}#{1} ", fragments1, fragments2);
-                    return true;
-                }
-            }
-            if (firstRef.Length > secondRef.Length)
-            {
-                var temp = secondRef;
-                secondRef = firstRef;
-                firstRef = temp;
-
-                temp = fragments1;
-                fragments1 = fragments2;
-                fragments2 = temp;
-            }
-            for (var i = 0; i < fragments.Count; i++)
-            {
-                var first = firstRef + fragments[i];
-                if (first.Length > totalLength)
-                {
-                    continue;
-                }
-                var newFragment = fragments1 + (fragments1.Length>0 ? " " : "") + fragments[i];
-                if (IsCompatible(newFragment, fragments2))
-                {
-                    var newFragments = new List<string>(fragments);
-                    newFragments.RemoveAt(i);
-                    if (Scan(first, secondRef, newFragments, totalLength, newFragment, fragments2))
+                    var c = readLine[j];
+                    if (c == 'x')
                     {
-                        return true;
+                        c = '.';
+                        X = j;
+                        Y = index;
                     }
+                    lines[j, index] = c;
                 }
             }
-            return false;
+            var line = string.Empty;
+            MapHelper.Map(lines, (i, j) =>
+            {
+                if (lines[i, j] != '.')
+                {
+                    return;
+                }
+                var bombs = MapHelper.ReduceNeightBors<int>(lines, i, j,
+                    (cell, accu) => accu + (cell == '*' ? 1 : 0));
+                if (bombs > 0)
+                {
+                    lines[i, j] = (char)('0' + bombs);
+                }
+            });
+
+            MapHelper.Map(lines, (x, y) =>
+            {
+                line += lines[x, y];
+                if (x == L - 1)
+                {
+                    Utils.LocalPrint(line);
+                    line = string.Empty;
+                }
+            });
+            var res = MapHelper.FloodFill(lines, X, Y, ' ', '.', MapHelper.Mode.BorderIncluded | MapHelper.Mode.WithDiagonale);
+
+            Console.WriteLine(res);
         }
 
-        private static bool IsCompatible(string first, string second)
+    }
+
+    static class MapHelper
+    {
+        [Flags]
+        public enum Mode
         {
-            int j = 0;
-            for (int i = 0; i < Math.Min(first.Length, second.Length); i++)
+            Basic,
+            BorderIncluded,
+            WithDiagonale
+        }
+
+        public static int FloodFill(char[,] array, int x, int y, char filler, Mode mode = 0)
+        {
+            return RecursiveFloodFill(array, x, y, array[x, y], filler, mode);
+        }
+
+        public static int FloodFill(char[,] array, int x, int y, char filler, char empty, Mode mode = 0)
+        {
+            if (array[x, y] != empty)
             {
-                if (first[i] == ' ')
+                return mode.HasFlag(Mode.BorderIncluded) ? 1 : 0;
+            }
+            return RecursiveFloodFill(array, x, y, empty, filler, mode);
+        }
+
+        private static int RecursiveFloodFill(char[,] array, int x, int y, char empty, char filler, Mode mode)
+        {
+            var result = 0;
+            if (x < 0 || x > array.GetUpperBound(0) || y < 0 || y > array.GetUpperBound(1))
+            {
+                return result;
+            }
+            var color = array[x, y];
+            if (color == filler || (!mode.HasFlag(Mode.BorderIncluded) && color != empty))
+            {
+                return result;
+            }
+            array[x, y] = filler;
+            result++;
+            if (mode.HasFlag(Mode.BorderIncluded) && color != empty)
+            {
+                return result;
+            }
+
+            MapNeightBors(array, x, y, (i, j, c) => result += RecursiveFloodFill(array, i, j, empty, filler, mode),
+                mode);
+            return result;
+        }
+
+
+        private static T SecuredWrapper<T>(char[,] map, int i, int j, Func<char, T, T> f, T accu)
+        {
+            if (i < 0 || i >= map.GetLength(0) || j < 0 || j >= map.GetLength(1))
+            {
+                return accu;
+            }
+            return f(map[i, j], accu);
+        }
+
+        private static void SecuredWrapper(char[,] map, int i, int j, Action<int, int, char> f)
+        {
+            if (i < 0 || i >= map.GetLength(0) || j < 0 || j >= map.GetLength(1))
+            {
+                return;
+            }
+            f(i, j, map[i, j]);
+        }
+
+        public static T ReduceNeightBors<T>(char[,] map, int x, int y, Func<char, T, T> func, Mode mode = Mode.WithDiagonale)
+        {
+            var result = default(T);
+
+            result = SecuredWrapper(map, x + 1, y, func, result);
+            result = SecuredWrapper(map, x, y + 1, func, result);
+            result = SecuredWrapper(map, x, y - 1, func, result);
+            result = SecuredWrapper(map, x - 1, y, func, result);
+            if (!mode.HasFlag(Mode.WithDiagonale))
+            {
+                return result;
+            }
+            result = SecuredWrapper(map, x + 1, y + 1, func, result);
+            result = SecuredWrapper(map, x - 1, y + 1, func, result);
+            result = SecuredWrapper(map, x + 1, y - 1, func, result);
+            result = SecuredWrapper(map, x - 1, y - 1, func, result);
+            return result;
+
+        }
+
+        public static void MapNeightBors(char[,] map, int x, int y, Action<int, int, char> func,
+            Mode mode = Mode.WithDiagonale)
+        {
+            SecuredWrapper(map, x + 1, y, func);
+            SecuredWrapper(map, x, y + 1, func);
+            SecuredWrapper(map, x, y - 1, func);
+            SecuredWrapper(map, x - 1, y, func);
+            if (!mode.HasFlag(Mode.WithDiagonale))
+            {
+                return;
+            }
+            SecuredWrapper(map, x + 1, y + 1, func);
+            SecuredWrapper(map, x - 1, y + 1, func);
+            SecuredWrapper(map, x + 1, y - 1, func);
+            SecuredWrapper(map, x - 1, y - 1, func);
+        }
+
+        public static void Map(char[,] map, Action<int, int> action)
+        {
+            for (var j = 0; j < map.GetLength(1); j++)
+            {
+                for (var i = 0; i < map.GetLength(0); i++)
                 {
-                    continue;
-                }
-                if (second[j] == ' ')
-                {
-                    j++;
-                }
-                switch (first[i])
-                {
-                    case 'A':
-                        if (second[i] != 'T')
-                            return false;
-                        break;
-                    case 'T':
-                        if (second[i] != 'A')
-                            return false;
-                        break;
-                    case 'G':
-                        if (second[i] != 'C')
-                            return false;
-                        break;
-                    case 'C':
-                        if (second[i] != 'G')
-                            return false;
-                        break;
-                        default:
-                            return false;
+                    action(i, j);
                 }
             }
-            return true;
         }
     }
 }

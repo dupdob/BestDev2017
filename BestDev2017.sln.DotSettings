@@ -5,6 +5,7 @@
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Categories/=Imported_002012_002F12_002F2017/@EntryIndexedValue">Imported 12/12/2017</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Description/@EntryValue">Flood Fill Algorithm</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Field/=char/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Field/=char/Expression/@EntryValue">suggestVariableType()</s:String>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Field/=char/Order/@EntryValue">0</s:Int64>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Reformat/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Scope/=558F05AA0DE96347816FF785232CFB2A/@KeyIndexDefined">True</s:Boolean>
@@ -17,28 +18,117 @@
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=298FC62AF66C974489A1AFFB587AD221/Text/@EntryValue">static class MapHelper
 {
-    public static void FloodFill($char$[,] array, int x, int y, $char$ filler)
-    {
-        RecursiveFloodFill(array, x, y, array[x, y], filler);
-    }
+    [Flags]&#xD;
+    public enum Mode&#xD;
+    {&#xD;
+        Basic,&#xD;
+        BorderIncluded,&#xD;
+        WithDiagonale&#xD;
+    }&#xD;
 
-    private static void RecursiveFloodFill($char$[,] array, int x, int y, $char$ empty, $char$ filler)
-    {
-        if (x &lt; 0 || x &gt; array.GetUpperBound(0) || y &lt; 0 || y &gt; array.GetUpperBound(1))
-        {
-            return;
-        }
-        var color = array[x, y];
-        if (color == filler || color!= empty)
-        {
-            return;
-        }
-        array[x, y] = filler;
-        RecursiveFloodFill(array, x+1, y, empty, filler);
-        RecursiveFloodFill(array, x, y + 1, empty, filler);
-        RecursiveFloodFill(array, x, y - 1, empty, filler);
-        RecursiveFloodFill(array, x - 1, y, empty, filler);
-    }
+    public static int FloodFill($char$[,] array, int x, int y, $char$ filler, Mode mode = 0)&#xD;
+    {&#xD;
+        return RecursiveFloodFill(array, x, y, array[x, y], filler, mode);&#xD;
+    }&#xD;
+&#xD;
+    public static int FloodFill($char$[,] array, int x, int y, $char$ filler, $char$ empty, Mode mode = 0)&#xD;
+    {&#xD;
+        if (array[x, y] != empty)&#xD;
+        {&#xD;
+            return mode.HasFlag(Mode.BorderIncluded) ? 1 : 0;&#xD;
+        }&#xD;
+        return RecursiveFloodFill(array, x, y, empty, filler, mode);&#xD;
+    }&#xD;
+
+    private static int RecursiveFloodFill($char$[,] array, int x, int y, $char$ empty, $char$ filler, Mode mode)&#xD;
+    {&#xD;
+        var result = 0;&#xD;
+        if (x &lt; 0 || x &gt; array.GetUpperBound(0) || y &lt; 0 || y &gt; array.GetUpperBound(1))&#xD;
+        {&#xD;
+            return result;&#xD;
+        }&#xD;
+        var color = array[x, y];&#xD;
+        if (color == filler || (!mode.HasFlag(Mode.BorderIncluded) &amp;&amp; color!=empty))&#xD;
+        {&#xD;
+            return result;&#xD;
+        }&#xD;
+        array[x, y] = filler;&#xD;
+        result++;&#xD;
+        if (mode.HasFlag(Mode.BorderIncluded) &amp;&amp; color != empty)&#xD;
+        {&#xD;
+            return result;&#xD;
+        }&#xD;
+&#xD;
+        MapNeightBors(array, x, y, (i, j, c) =&gt; result+= RecursiveFloodFill(array, i, j, empty, filler, mode), mode);&#xD;
+        return result;&#xD;
+    }&#xD;
+&#xD;
+
+    private static T SecuredWrapper&lt;T&gt;($char$[,] map, int i, int j, Func&lt;$char$, T, T&gt; f, T accu)&#xD;
+    {&#xD;
+        if (i&lt; 0 || i &gt;= map.GetLength(0) || j&lt; 0 || j &gt;= map.GetLength(1))&#xD;
+        {&#xD;
+            return accu;&#xD;
+        }&#xD;
+        return f(map[i, j], accu);&#xD;
+    }&#xD;
+&#xD;
+    private static void SecuredWrapper($char$[,] map, int i, int j, Action&lt;int, int, $char$&gt; f)&#xD;
+    {&#xD;
+        if (i&lt; 0 || i &gt;= map.GetLength(0) || j&lt; 0 || j &gt;= map.GetLength(1))&#xD;
+        {&#xD;
+            return;&#xD;
+        }&#xD;
+        f(i, j, map[i, j]);&#xD;
+    }&#xD;
+&#xD;
+    public static T ReduceNeightBors&lt;T&gt;($char$[,] map, int x, int y, Func&lt;$char$, T, T&gt; func, Mode mode = Mode.WithDiagonale) &#xD;
+    {&#xD;
+        var result = default(T);&#xD;
+&#xD;
+        result = SecuredWrapper(map, x + 1, y, func, result);&#xD;
+        result = SecuredWrapper(map, x, y + 1, func, result);&#xD;
+        result = SecuredWrapper(map, x, y - 1, func, result);&#xD;
+        result = SecuredWrapper(map, x - 1, y, func, result);&#xD;
+        if (!mode.HasFlag(Mode.WithDiagonale))&#xD;
+        {&#xD;
+            return result;&#xD;
+        }&#xD;
+        result = SecuredWrapper(map, x + 1, y + 1, func, result);&#xD;
+        result = SecuredWrapper(map, x - 1, y + 1, func, result);&#xD;
+        result = SecuredWrapper(map, x + 1, y - 1, func, result);&#xD;
+        result = SecuredWrapper(map, x - 1, y - 1, func, result);&#xD;
+        return result;&#xD;
+                &#xD;
+    }&#xD;
+&#xD;
+    public static void MapNeightBors($char$[,] map, int x, int y, Action&lt;int, int, $char$&gt; func, Mode mode = Mode.WithDiagonale) &#xD;
+    {&#xD;
+        SecuredWrapper(map, x + 1, y, func);&#xD;
+        SecuredWrapper(map, x, y + 1, func);&#xD;
+        SecuredWrapper(map, x, y - 1, func);&#xD;
+        SecuredWrapper(map, x - 1, y, func);&#xD;
+        if (!mode.HasFlag(Mode.WithDiagonale))&#xD;
+        {&#xD;
+            return;&#xD;
+        }&#xD;
+        SecuredWrapper(map, x + 1, y + 1, func);&#xD;
+        SecuredWrapper(map, x - 1, y + 1, func);&#xD;
+        SecuredWrapper(map, x + 1, y - 1, func);&#xD;
+        SecuredWrapper(map, x - 1, y - 1, func);&#xD;
+    }&#xD;
+&#xD;
+    public static void Map($char$[,] map, Action&lt;int, int&gt; action)&#xD;
+    {&#xD;
+        for (var j = 0; j &lt; map.GetLength(1); j++)&#xD;
+        {&#xD;
+            for (var i = 0; i &lt; map.GetLength(0); i++)&#xD;
+            {&#xD;
+                action(i, j);&#xD;
+            }&#xD;
+        }&#xD;
+    }&#xD;
+
 	public static int FindClosest($char$[,] map, int x, int y, out int goalX, out int goalY)
     {
         var distances = new int[map.GetLength(0), map.GetLength(1)];
@@ -107,6 +197,35 @@
         RecursiveFindClosest(map, distances, curDist, x - 1, y, ref mindDist, ref goalX, ref goalY);
     }
 }</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Description/@EntryValue">read n items from console</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=count/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=count/Order/@EntryValue">3</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=index/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=index/Expression/@EntryValue">suggestIndexVariable()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=index/Order/@EntryValue">2</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=int/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=int/Expression/@EntryValue">suggestVariableType()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=int/InitialRange/@EntryValue">1</s:Int64>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=int/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=items/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=items/Expression/@EntryValue">suggestVariableName()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Field/=items/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/Type/@EntryValue">InCSharpStatement</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Shortcut/@EntryValue">rnitems</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=314D81EE43400348BE90224D3F573690/Text/@EntryValue">var $count$ = int.Parse(Console.ReadLine());&#xD;
+var $items$ = new List&lt;$int$&gt;($count$);&#xD;
+for (var $index$ = 0; $index$ &lt; $count$; $index$++)&#xD;
+{&#xD;
+    var readLine = Console.ReadLine();&#xD;
+    $items$.Add($int$.Parse(readLine));&#xD;
+}&#xD;
+</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Description/@EntryValue">read a string from console</s:String>
