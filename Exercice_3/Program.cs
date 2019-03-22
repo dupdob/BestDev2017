@@ -21,6 +21,30 @@ namespace CSharpContestProject
     {
         static void Main(string[] args)
         {
+            var cities = int.Parse(Console.ReadLine());
+            var buildings = int.Parse(Console.ReadLine());
+            int minBuildingsize = int.MaxValue;
+            int bestCity = -1;
+            for (int index = 0; index < cities; index++)
+            {
+                var maxSize = int.MinValue;
+                var readLine = Console.ReadLine().Split(' ');
+                foreach (var building in readLine)
+                {
+                    var size = int.Parse(building);
+                    if (size > maxSize)
+                    {
+                        maxSize = size;
+                    }
+                }
+                if (maxSize < minBuildingsize)
+                {
+                    minBuildingsize = maxSize;
+                    bestCity = index;
+                }
+            }
+            Console.WriteLine(bestCity);
+
         }
     }
 }

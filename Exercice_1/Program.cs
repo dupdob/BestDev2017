@@ -21,6 +21,14 @@ namespace CSharpContestProject
     {
         static void Main(string[] args)
         {
+            var count = int.Parse(Console.ReadLine());
+            var total = 0;
+            for (int index = 0; index < count; index++)
+            {
+                var readLine = Console.ReadLine();
+                total += int.Parse(readLine);
+            }
+            Console.WriteLine(total);
         }
     }
 }

@@ -230,6 +230,7 @@ for (var $index$ = 0; $index$ &lt; $count$; $index$++)&#xD;
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Description/@EntryValue">read a string from console</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Field/=text/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Field/=text/Expression/@EntryValue">suggestVariableName()</s:String>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Field/=text/Order/@EntryValue">0</s:Int64>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Reformat/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/@KeyIndexDefined">True</s:Boolean>
@@ -243,6 +244,7 @@ for (var $index$ = 0; $index$ &lt; $count$; $index$++)&#xD;
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6682238FE0E8BC4D972A5DCF1CCE247F/Text/@EntryValue">var $text$=Console.ReadLine();</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Field/=count/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Field/=count/Expression/@EntryValue">suggestVariableName()</s:String>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Field/=count/Order/@EntryValue">0</s:Int64>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=73384AAC48BBF8499386D90D9917EF6F/Scope/=2C285F182AC98D44B0B4F29D4D2149EC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">2.0</s:String>

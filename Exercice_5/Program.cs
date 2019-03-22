@@ -21,6 +21,31 @@ namespace CSharpContestProject
     {
         static void Main(string[] args)
         {
+            var count = int.Parse(Console.ReadLine());
+            var variations = new List<int>(count);
+            var quote = 0;
+            for (var i = 0; i < count; i++)
+            {
+                var readLine = Console.ReadLine();
+                var item = int.Parse(readLine);
+                quote += item;
+                variations.Add(quote);
+            }
+            var minQuote = int.MaxValue;
+            var maxGain = int.MinValue;
+            for (int i = 0; i < count; i++)
+            {
+                var curQuote = variations[i];
+                if (curQuote < minQuote)
+                {
+                    minQuote = curQuote;
+                }
+                else if (curQuote - minQuote > maxGain)
+                {
+                    maxGain = curQuote - minQuote;
+                }
+            }
+            Console.WriteLine(maxGain);
         }
     }
 }
